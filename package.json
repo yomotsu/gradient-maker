@@ -1,0 +1,25 @@
+{
+  "name": "gradient-maker",
+  "version": "0.0.0",
+  "author": "Yomotsu",
+  "license": "MIT",
+  "repository": "yomotsu/gradient-maker",
+  "jsnext:main": "dist/gradient-maker.module.js",
+  "module": "dist/gradient-maker.module.js",
+  "main": "dist/gradient-maker.js",
+  "types": "dist/gradient-maker.d.ts",
+  "devDependencies": {
+    "rollup": "^1.10.0",
+    "rollup-plugin-typescript2": "^0.20.1",
+    "rollup-watch": "^4.3.1",
+    "terser": "^3.17.0",
+    "typescript": "^3.4.3"
+  },
+  "scripts": {
+    "dev": "rollup --config --watch",
+    "build": "rollup --config && terser 'dist/gradient-maker.js' -o 'dist/gradient-maker.min.js' --comments '/^!/'"
+  },
+  "keywords": [
+    "gradient"
+  ]
+}

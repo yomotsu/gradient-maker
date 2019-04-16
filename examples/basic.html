@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+<title>=^.^=</title>
+<style>
+.grad {
+  width: 128px;
+  height: 128px;
+}
+</style>
+</head>
+<body>
+<p><a href="https://github.com/yomotsu/gradient-maker">GitHub repo</a></p>
+
+first rect is in div element. second one is canvas element.
+
+<div id="grad1" class="grad">div</div>
+
+
+<script src="../dist/gradient-maker.js"></script>
+<script>
+const angle = '30deg';
+const colorStops = [
+  { offset: 0.0, color: 'black' },
+  { offset: 0.2, color: '#090979' },
+  { offset: 0.6, color: 'rgba( 189, 4, 149, 1)' },
+  { offset: 1.0, color: 'rgba( 0, 212, 255, 0.8)' },
+];
+
+const gradMaker = new GradientMaker( angle, colorStops );
+
+document.body.appendChild( gradMaker.canvas() );
+document.getElementById( 'grad1' ).style.background = gradMaker.css();
+
+
+</script>
+
+</body>
+</html>
