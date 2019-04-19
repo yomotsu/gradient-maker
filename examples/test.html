@@ -4,37 +4,82 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width">
 <title>=^.^=</title>
+<style>
+  div, canvas {
+    display: inline-block;
+  }
+</style>
 </head>
 <body>
 <p><a href="https://github.com/yomotsu/gradient-maker">GitHub repo</a></p>
 
-<input type="range" min="-720" max="720" step="1" id="angleInput" oninput="gradMaker.angle = +this.value * GradientMaker.DEG2RAD; draw(); output.innerHTML = this.value">
+<input type="range" min="-720" max="720" step="1" id="angleInput" oninput="draw( +this.value * GradientMaker.DEG2RAD );"><br>
+
 <div id="output"></div>
-<div id="div" style="width: 256px; height: 128px"></div>
-<canvas id="canvas" width="256" height="128"></canvas>
+<br>
+
+<div id="div0" style="width: 256px; height: 128px"></div>
+<canvas id="canvas0" width="256" height="128"></canvas>
+
+<div id="div1" style="width: 256px; height: 128px"></div>
+<canvas id="canvas1" width="256" height="128"></canvas>
+
+<div id="div2" style="width: 256px; height: 128px"></div>
+<canvas id="canvas2" width="256" height="128"></canvas>
 
 <script src="../dist/gradient-maker.js"></script>
 <script>
 const angle = '0deg';
-const colorStops = [
+const colorStops0 = [
   { offset: 0.0, color: 'black' },
   { offset: 0.2, color: '#090979' },
   { offset: 0.6, color: 'rgba( 189, 4, 149, 1)' },
   { offset: 1.0, color: 'rgba( 0, 212, 255, 0.8)' },
 ];
+const colorStops1 = [
+  { offset: 0.0, color: 'black' },
+  { offset: 1.0, color: '#fff' },
+];
+const colorStops2 = [
+  { offset: 0.00, color: '#444' },
+  { offset: 0.25, color: '#444' },
+  { offset: 0.25, color: '#000' },
+  { offset: 0.75, color: '#444' },
+  { offset: 0.75, color: '#000' },
+  { offset: 1.00, color: '#444' },
+];
 
-const gradMaker = new GradientMaker( angle, colorStops );
-const context2d = canvas.getContext( '2d' );
+const gradMaker0 = new GradientMaker( angle, colorStops0 );
+const gradMaker1 = new GradientMaker( angle, colorStops1 );
+const gradMaker2 = new GradientMaker( angle, colorStops2 );
+const context2d0 = canvas0.getContext( '2d' );
+const context2d1 = canvas1.getContext( '2d' );
+const context2d2 = canvas2.getContext( '2d' );
 
-function draw() {
+function draw( angle ) {
 
-  const grad = gradMaker.context2dFillStyle( canvas.width, canvas.height, context2d );
-  context2d.fillStyle = grad;
-  context2d.fillRect( 0, 0, canvas.width, canvas.height );
-  div.style.background = gradMaker.css();
+  gradMaker0.angle = angle;
+  gradMaker1.angle = angle;
+  gradMaker2.angle = angle;
+
+  const grad0 = gradMaker0.context2dFillStyle( canvas0.width, canvas0.height, context2d0 );
+  const grad1 = gradMaker1.context2dFillStyle( canvas1.width, canvas1.height, context2d1 );
+  const grad2 = gradMaker2.context2dFillStyle( canvas2.width, canvas2.height, context2d2 );
+  context2d0.fillStyle = grad0;
+  context2d1.fillStyle = grad1;
+  context2d2.fillStyle = grad2;
+  context2d0.fillRect( 0, 0, canvas0.width, canvas0.height );
+  context2d1.fillRect( 0, 0, canvas1.width, canvas1.height );
+  context2d2.fillRect( 0, 0, canvas2.width, canvas2.height );
+  div0.style.background = gradMaker0.css();
+  div1.style.background = gradMaker1.css();
+  div2.style.background = gradMaker2.css();
+
+  output.innerHTML = angle;
 
 }
 
+draw( 88 );
 </script>
 
 </body>
