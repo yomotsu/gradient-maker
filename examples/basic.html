@@ -6,7 +6,7 @@
 <title>=^.^=</title>
 <style>
 .grad {
-  width: 128px;
+  width: 256px;
   height: 128px;
 }
 </style>
@@ -21,7 +21,7 @@ first rect is in div element. second one is canvas element.
 
 <script src="../dist/gradient-maker.js"></script>
 <script>
-const angle = '30deg';
+const angle = '88deg';
 const colorStops = [
   { offset: 0.0, color: 'black' },
   { offset: 0.2, color: '#090979' },
@@ -31,7 +31,7 @@ const colorStops = [
 
 const gradMaker = new GradientMaker( angle, colorStops );
 
-document.body.appendChild( gradMaker.canvas() );
+document.body.appendChild( gradMaker.canvas( 256, 128 ) );
 document.getElementById( 'grad1' ).style.background = gradMaker.css();
 
 

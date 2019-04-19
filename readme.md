@@ -8,13 +8,14 @@ get liner gradient in CSS, Canvas2d and `fillStyle` of context2d.
 ## Example
 
 - [basic](https://yomotsu.github.io/gradient-maker/examples/basic.html)
+- [test](https://yomotsu.github.io/gradient-maker/examples/test.html)
 
 ## Usage
 
 ### As a module
 
 ```js
-import ComparisonSlider from 'gradient-maker';
+import GradientMaker from 'gradient-maker';
 
 const angle = '30deg';
 const colorStops = [

@@ -3,11 +3,12 @@ interface ColorStop {
 	color: string;
 };
 
-const PI_HALF = Math.PI * 0.5;
+type GradientLineCoords = [ number, number, number, number ];
 
 export default class GradientMaker {
 
 	static DEG2RAD = Math.PI / 180;
+	static RAD2DEG = 180 / Math.PI;
 
 	static normalizeCSSAngle( cssAngle: number | string ): number {
 
@@ -44,7 +45,7 @@ export default class GradientMaker {
 
 	// }
 
-	public angle: number;
+	public angle: number; // angle is in radian. starting from North and clckwise, the same as CSS rotation.
 	public colorStops: ColorStop[];
 
 	constructor( cssAngle: number | string = 0, colorStops: ColorStop[] = [] ) {
@@ -78,36 +79,8 @@ export default class GradientMaker {
 		context2d: CanvasRenderingContext2D,
 	) {
 
-		// https://developer.mozilla.org/docs/Web/CSS/linear-gradient#Composition_of_a_linear_gradient
-
-		const cx = width * 0.5;
-		const cy = height * 0.5;
-		const hypt = cy / Math.cos( this.angle );
-		const area0 = Math.PI * 0.0 <= this.angle && this.angle < Math.PI * 0.5; //   0deg to  89.9... deg
-		// const area1 = Math.PI * 0.5 <= this.angle && this.angle < Math.PI * 1.0; //  90deg to 179.9... deg
-		const area2 = Math.PI * 1.0 <= this.angle && this.angle < Math.PI * 1.5; // 180deg to 269.9... deg
-		const area3 = Math.PI * 1.5 <= this.angle && this.angle < Math.PI * 2.0; // 270deg to 359.9... deg
-		const isVertical   = area0 || area2;
-		// const isHorizontal = area1 || area3;
-		const isFromBottom = area2 || area3;
-		const triangleBottom = isVertical ?
-			cx - Math.sqrt( hypt * hypt - cy * cy ) :
-			cx + Math.sqrt( hypt * hypt - cy * cy );
-		
-		const diag = Math.sin( this.angle ) * triangleBottom;
-		const len = hypt + diag;
-
-		const topX    = cx + Math.cos(   PI_HALF + this.angle ) * len;
-		const topY    = cy + Math.sin(   PI_HALF + this.angle ) * len;
-		const bottomX = cx + Math.cos( - PI_HALF + this.angle ) * len;
-		const bottomY = cy + Math.sin( - PI_HALF + this.angle ) * len;
-		
-		// ---
-		
-		const grad = isFromBottom ?
-			context2d.createLinearGradient( bottomX, bottomY, topX, topY ) :
-			context2d.createLinearGradient( topX, topY, bottomX, bottomY );
-
+		const gradientLineCoords = getGradientLineCoords( this.angle, width, height );
+		const grad = context2d.createLinearGradient( ...gradientLineCoords )
 		this.colorStops.forEach( ( colorStop ) => grad.addColorStop( colorStop.offset, colorStop.color ) );
 
 		return grad;
@@ -121,4 +94,53 @@ export default class GradientMaker {
 
 	}
 
+}
+
+
+function getGradientLineCoords(
+	angle: number,
+	width: number,
+	height: number
+): GradientLineCoords {
+
+	const canvasGradentAngle = modulo( ( - angle + Math.PI * 0.5 ), Math.PI * 2 );
+
+	// vertical and horizontal
+	if ( angle === Math.PI * 0.0 ) return [ 0,     height, 0,     0      ];
+	if ( angle === Math.PI * 0.5 ) return [ 0,     0,      width, 0      ];
+	if ( angle === Math.PI * 1.0 ) return [ 0,     0,      0,     height ];
+	if ( angle === Math.PI * 1.5 ) return [ width, 0,      0,     0      ];
+
+	// other angle
+	// https://developer.mozilla.org/docs/Web/CSS/linear-gradient#Composition_of_a_linear_gradient
+	const cx = width * 0.5;
+	const cy = height * 0.5;
+	const slope = Math.tan( canvasGradentAngle );
+	const pslope = - 1 / slope;
+
+	const corner =
+		canvasGradentAngle < Math.PI * 0.5 ? [   cx,   cy ] :
+		canvasGradentAngle < Math.PI * 1.0 ? [ - cx,   cy ] :
+		canvasGradentAngle < Math.PI * 1.5 ? [ - cx, - cy ] :
+		                                     [   cx, - cy ];
+
+	const intercept = corner[ 1 ] - pslope * corner[ 0 ];
+	const endx = intercept / ( slope - pslope );
+	const endy = pslope * endx + intercept;
+
+	const x0 = cx - endx;
+	const y0 = cy + endy;
+	const x1 = cx + endx;
+	const y1 = cy - endy;
+
+	return [ x0, y0, x1, y1 ];
+
+};
+
+function modulo( n: number, d: number ): number {
+
+	if ( d === 0 ) return n;
+	if ( d < 0 ) return NaN;
+
+  return ( n % d + d ) % d;
 }
