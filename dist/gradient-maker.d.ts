@@ -4,6 +4,7 @@ interface ColorStop {
 }
 export default class GradientMaker {
     static DEG2RAD: number;
+    static RAD2DEG: number;
     static normalizeCSSAngle(cssAngle: number | string): number;
     angle: number;
     colorStops: ColorStop[];

@@ -4,7 +4,6 @@
  * (c) 2019 @yomotsu
  * Released under the MIT License.
  */
-var PI_HALF = Math.PI * 0.5;
 var GradientMaker = (function () {
     function GradientMaker(cssAngle, colorStops) {
         if (cssAngle === void 0) { cssAngle = 0; }
@@ -62,26 +61,8 @@ var GradientMaker = (function () {
     GradientMaker.prototype.context2dFillStyle = function (width, height, context2d) {
         if (width === void 0) { width = 128; }
         if (height === void 0) { height = 128; }
-        var cx = width * 0.5;
-        var cy = height * 0.5;
-        var hypt = cy / Math.cos(this.angle);
-        var area0 = Math.PI * 0.0 <= this.angle && this.angle < Math.PI * 0.5;
-        var area2 = Math.PI * 1.0 <= this.angle && this.angle < Math.PI * 1.5;
-        var area3 = Math.PI * 1.5 <= this.angle && this.angle < Math.PI * 2.0;
-        var isVertical = area0 || area2;
-        var isFromBottom = area2 || area3;
-        var triangleBottom = isVertical ?
-            cx - Math.sqrt(hypt * hypt - cy * cy) :
-            cx + Math.sqrt(hypt * hypt - cy * cy);
-        var diag = Math.sin(this.angle) * triangleBottom;
-        var len = hypt + diag;
-        var topX = cx + Math.cos(PI_HALF + this.angle) * len;
-        var topY = cy + Math.sin(PI_HALF + this.angle) * len;
-        var bottomX = cx + Math.cos(-PI_HALF + this.angle) * len;
-        var bottomY = cy + Math.sin(-PI_HALF + this.angle) * len;
-        var grad = isFromBottom ?
-            context2d.createLinearGradient(bottomX, bottomY, topX, topY) :
-            context2d.createLinearGradient(topX, topY, bottomX, bottomY);
+        var gradientLineCoords = getGradientLineCoords(this.angle, width, height);
+        var grad = context2d.createLinearGradient.apply(context2d, gradientLineCoords);
         this.colorStops.forEach(function (colorStop) { return grad.addColorStop(colorStop.offset, colorStop.color); });
         return grad;
     };
@@ -90,7 +71,42 @@ var GradientMaker = (function () {
         return "linear-gradient(" + this.angle + "rad, " + cssGrad.join() + " )";
     };
     GradientMaker.DEG2RAD = Math.PI / 180;
+    GradientMaker.RAD2DEG = 180 / Math.PI;
     return GradientMaker;
 }());
+function getGradientLineCoords(angle, width, height) {
+    var canvasGradentAngle = modulo((-angle + Math.PI * 0.5), Math.PI * 2);
+    if (angle === Math.PI * 0.0)
+        return [0, height, 0, 0];
+    if (angle === Math.PI * 0.5)
+        return [0, 0, width, 0];
+    if (angle === Math.PI * 1.0)
+        return [0, 0, 0, height];
+    if (angle === Math.PI * 1.5)
+        return [width, 0, 0, 0];
+    var cx = width * 0.5;
+    var cy = height * 0.5;
+    var slope = Math.tan(canvasGradentAngle);
+    var pslope = -1 / slope;
+    var corner = canvasGradentAngle < Math.PI * 0.5 ? [cx, cy] :
+        canvasGradentAngle < Math.PI * 1.0 ? [-cx, cy] :
+            canvasGradentAngle < Math.PI * 1.5 ? [-cx, -cy] :
+                [cx, -cy];
+    var intercept = corner[1] - pslope * corner[0];
+    var endx = intercept / (slope - pslope);
+    var endy = pslope * endx + intercept;
+    var x0 = cx - endx;
+    var y0 = cy + endy;
+    var x1 = cx + endx;
+    var y1 = cy - endy;
+    return [x0, y0, x1, y1];
+}
+function modulo(n, d) {
+    if (d === 0)
+        return n;
+    if (d < 0)
+        return NaN;
+    return (n % d + d) % d;
+}
 
 export default GradientMaker;
